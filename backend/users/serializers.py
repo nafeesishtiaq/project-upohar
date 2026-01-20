@@ -6,6 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
+  email = serializers.EmailField(required=True)
   password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
 
   class Meta:
