@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../../api/api";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function Register() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -14,6 +15,7 @@ export default function Register() {
     try {
       await api.post("auth/register/", form);
       alert("Account created. You can log in now.");
+      window.location.href = "/login";
     } catch (err) {
       setError("Registration failed");
     }
@@ -47,9 +49,30 @@ export default function Register() {
           required
         />
 
-        <button className="w-full bg-black text-white py-2 rounded">
+        <button className="w-full bg-black text-white py-2 rounded mb-3">
           Sign up
         </button>
+
+        <div className="text-center text-sm text-gray-500 mb-3">or</div>
+
+        <GoogleLogin
+          onSuccess={async (credentialResponse) => {
+            try {
+              const res = await api.post("auth/google/", {
+                id_token: credentialResponse.credential,
+              });
+
+              localStorage.setItem("access", res.data.access);
+              localStorage.setItem("refresh", res.data.refresh);
+
+              alert("Signed up with Google");
+              window.location.href = "/";
+            } catch {
+              setError("Google signup failed");
+            }
+          }}
+          onError={() => setError("Google signup failed")}
+        />
       </form>
     </div>
   );

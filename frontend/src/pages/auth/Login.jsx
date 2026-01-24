@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../../api/api";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -21,6 +22,25 @@ export default function Login() {
     } catch (err) {
       setError("Invalid credentials");
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const res = await api.post("auth/google/", {
+        id_token: credentialResponse.credential,
+      });
+
+      localStorage.setItem("access", res.data.access);
+      localStorage.setItem("refresh", res.data.refresh);
+
+      alert("Logged in with Google");
+    } catch (err) {
+      setError("Google login failed");
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google login failed");
   };
 
   return (
@@ -55,6 +75,10 @@ export default function Login() {
           Login
         </button>
       </form>
+      <GoogleLogin
+        onSuccess={handleGoogleSuccess}
+        onError={handleGoogleError}
+      />
     </div>
   );
 }
